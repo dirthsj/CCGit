@@ -1,16 +1,16 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
+  "modid": "ccgit",
+  "name": "CC Git",
+  "description": "Bringing version control to ComptuerCraft",
+  "version": "0.1",
+  "mcversion": "1.8.9",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["KingofGamesYami"],
+  "credits": "Dan200, SquidDev, Forge Team, JGit Team",
   "logoFile": "",
   "screenshots": [],
-  "dependencies": []
+  "dependencies": ["ComputerCraft", "CCTweaks"]
 }
 ]

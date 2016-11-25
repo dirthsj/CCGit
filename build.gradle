@@ -42,6 +42,11 @@ repositories {
         name = "squiddev"
         url = "https://dl.bintray.com/squiddev/maven"
     }
+
+    ivy {
+        name = "ComputerCraft"
+        artifactPattern "http://addons-origin.cursecdn.com/files/2291/384/[module][revision](.[ext])"
+    }
 }
 
 dependencies {
@@ -50,7 +55,9 @@ dependencies {
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
 
-    compile "org.squiddev:CCTweaks:1.8-1.2.3:dev"
+    compile "ComputerCraft:ComputerCraft:1.79"
+
+    compile "org.squiddev:CCTweaks:1.8.9-1.2.3:dev"
 
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env

@@ -10,7 +10,6 @@ import net.minecraft.server.MinecraftServer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.luaj.vm2.LuaString;
 import org.squiddev.cctweaks.api.lua.ILuaAPI;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 
@@ -24,8 +23,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor, IComputerAccess {
     private File computerDir;
 
     public CCGit( IComputerAccess computer ){
-        this.computer = computer;
-        this.computerDir = new File( ComputerCraft.getWorldDir( MinecraftServer.getServer().getEntityWorld() ), "computer" + computer.getID() );
+        this.computerDir = new File( ComputerCraft.getWorldDir( MinecraftServer.getServer().getEntityWorld() ), "computer/" + computer.getID() );
     }
 
     @Override

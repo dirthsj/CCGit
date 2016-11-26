@@ -21,7 +21,7 @@ public class Register {
 
             @Override
             public String[] getNames() {
-                return new String[]{"socket"};
+                return new String[]{"ccgit"};
             }
         });
     }

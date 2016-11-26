@@ -1,8 +1,6 @@
 package org.kingofgamesyami.ccgit;
 
 import dan200.computercraft.ComputerCraft;
-import dan200.computercraft.api.filesystem.IMount;
-import dan200.computercraft.api.filesystem.IWritableMount;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -19,7 +17,7 @@ import java.io.File;
  * Created by Steven on 11/25/2016.
  */
 public class CCGit implements ILuaAPI, IMethodDescriptor {
-    private File computerDir;
+    private final File computerDir;
 
     public CCGit( IComputerAccess computer ){
         this.computerDir = new File( ComputerCraft.getWorldDir( MinecraftServer.getServer().getEntityWorld() ), "computer/" + computer.getID() );

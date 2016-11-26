@@ -37,6 +37,11 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
 repositories {
     maven {
         name = "squiddev"
@@ -62,7 +67,7 @@ dependencies {
 
     compile "ComputerCraft:ComputerCraft:1.79"
 
-    compile 'org.eclipse.jgit:org.eclipse.jgit:4.5.0.201609210915-r'
+    shade 'org.eclipse.jgit:org.eclipse.jgit:4.5.0.201609210915-r'
 
     compile "org.squiddev:CCTweaks:1.8.9-1.2.3:dev"
 
@@ -83,6 +88,15 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
 }
+
+jar {
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
+}
+
 
 processResources
 {

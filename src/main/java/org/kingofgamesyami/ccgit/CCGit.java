@@ -18,8 +18,7 @@ import java.io.File;
 /**
  * Created by Steven on 11/25/2016.
  */
-public class CCGit implements ILuaAPI, IMethodDescriptor, IComputerAccess {
-    private IComputerAccess computer;
+public class CCGit implements ILuaAPI, IMethodDescriptor {
     private File computerDir;
 
     public CCGit( IComputerAccess computer ){
@@ -80,45 +79,5 @@ public class CCGit implements ILuaAPI, IMethodDescriptor, IComputerAccess {
     @Override
     public boolean willYield(int i) {
         return false;
-    }
-
-    @Override
-    public String mount(String s, IMount iMount) {
-        return null;
-    }
-
-    @Override
-    public String mount(String s, IMount iMount, String s1) {
-        return null;
-    }
-
-    @Override
-    public String mountWritable(String s, IWritableMount iWritableMount) {
-        return null;
-    }
-
-    @Override
-    public String mountWritable(String s, IWritableMount iWritableMount, String s1) {
-        return null;
-    }
-
-    @Override
-    public void unmount(String s) {
-
-    }
-
-    @Override
-    public int getID() {
-        return 0;
-    }
-
-    @Override
-    public void queueEvent(String s, Object[] objects) {
-
-    }
-
-    @Override
-    public String getAttachmentName() {
-        return null;
     }
 }

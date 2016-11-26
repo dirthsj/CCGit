@@ -47,6 +47,11 @@ repositories {
         name = "ComputerCraft"
         artifactPattern "http://addons-origin.cursecdn.com/files/2291/384/[module][revision](.[ext])"
     }
+
+    maven {
+        name = "eclipse"
+        url = "https://repo.eclipse.org/content/groups/releases/"
+    }
 }
 
 dependencies {
@@ -56,6 +61,8 @@ dependencies {
     //compile "some.group:artifact:version"
 
     compile "ComputerCraft:ComputerCraft:1.79"
+
+    compile 'org.eclipse.jgit:org.eclipse.jgit:4.5.0.201609210915-r'
 
     compile "org.squiddev:CCTweaks:1.8.9-1.2.3:dev"
 

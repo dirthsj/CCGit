@@ -64,11 +64,11 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                     throw new LuaException( "Expected String, String" );
                 }
                 try{
-                    Git.cloneRepository().setDirectory( new File( this.computerDir, (String)arguments[ 1 ] ) ).setRemote( (String)arguments[0] ).call();
+                    Git.cloneRepository().setURI( (String)arguments[0] ).setDirectory( getAbsoluteDir( (String)arguments[1] )).call();
                 } catch( InvalidRemoteException e ){
                     throw new LuaException( "Invalid Remote" );
                 } catch( GitAPIException e ){
-                    throw new LuaException( "A Problem Occurred" );
+                    throw new LuaException( "Git API Exception" );
                 }
         }
         return new Object[0];
@@ -77,5 +77,17 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
     @Override
     public boolean willYield(int i) {
         return false;
+    }
+
+    private File getAbsoluteDir( String localDir ) throws LuaException {
+        File result = new File( this.computerDir, localDir );
+        File temp = result;
+        while( !temp.getAbsolutePath().equals( this.computerDir.getAbsolutePath() ) ){
+            temp = temp.getParentFile();
+            if( temp.equals( null ) ){
+                throw new LuaException( "Attempt to break sandbox with path " + result.getAbsolutePath() );
+            }
+        }
+        return result;
     }
 }

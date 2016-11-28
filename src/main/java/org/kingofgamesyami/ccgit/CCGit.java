@@ -4,10 +4,10 @@ import dan200.computercraft.ComputerCraft;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.server.proxy.ComputerCraftProxyServer;
 import net.minecraft.server.MinecraftServer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.squiddev.cctweaks.api.lua.ILuaAPI;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 
@@ -18,8 +18,11 @@ import java.io.File;
  */
 public class CCGit implements ILuaAPI, IMethodDescriptor {
     private final File computerDir;
+    private final IComputerAccess computer;
+    private int identifier = 0;
 
     public CCGit( IComputerAccess computer ){
+        this.computer = computer;
         this.computerDir = new File( ComputerCraft.getWorldDir( MinecraftServer.getServer().getEntityWorld() ), "computer/" + computer.getID() );
     }
 
@@ -63,12 +66,14 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                 if( arguments.length < 2 || !( arguments[ 0 ] instanceof String && arguments[ 1 ] instanceof String ) ){
                     throw new LuaException( "Expected String, String" );
                 }
-                try{
-                    Git.cloneRepository().setURI( (String)arguments[0] ).setDirectory( getAbsoluteDir( (String)arguments[1] )).call();
-                } catch( InvalidRemoteException e ){
-                    throw new LuaException( "Invalid Remote" );
-                } catch( GitAPIException e ){
-                    throw new LuaException( "Git API Exception" );
+                int thisRequest = identifier++;
+                // Git.cloneRepository().setURI( (String)arguments[ 0 ] ).setDirectory( getAbsoluteDir( (String)arguments[1] ) ) )
+                Main.gitRunnable.queue( new GitRequest( computer, thisRequest, Git.cloneRepository().setURI( (String)arguments[ 0 ] ).setDirectory( getAbsoluteDir( (String)arguments[1] ) ) ) );
+                while(true){
+                    Object[] event = context.pullEvent( "ccgit" );
+                    if( event[ 1 ] instanceof Integer && (Integer)event[ 1 ] == thisRequest ){
+                        return new Object[]{event[2], event[3]};
+                    }
                 }
         }
         return new Object[0];
@@ -76,7 +81,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
 
     @Override
     public boolean willYield(int i) {
-        return false;
+        return true;
     }
 
     private File getAbsoluteDir( String localDir ) throws LuaException {

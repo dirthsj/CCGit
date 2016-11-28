@@ -5,6 +5,7 @@ import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
@@ -14,22 +15,28 @@ import net.minecraftforge.fml.relauncher.Side;
 public class Main {
 
     public static GitRunnable gitRunnable;
-    private Thread gitThread;
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
         Register.init();
         gitRunnable = new GitRunnable();
-        gitThread = new Thread( gitThread );
-        gitThread.setName( "CCGit" );
+        gitRunnable.setName( "Git Thread" );
     }
 
     @Mod.EventHandler
     public void onServerStart(FMLServerStartedEvent event) {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {
             FMLLog.info( "Attempting to start Git Thread" );
-            gitThread.start();
+            gitRunnable.start();
+        }
+    }
+
+    @Mod.EventHandler
+    public void onServerStopped(FMLServerStoppedEvent event) {
+        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {
+            FMLLog.info( "Stopping Git Thread" );
+            gitRunnable.interrupt();
         }
     }
 }

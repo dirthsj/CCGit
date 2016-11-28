@@ -1,15 +1,16 @@
 package org.kingofgamesyami.ccgit;
 
+import dan200.computercraft.api.lua.LuaException;
 import net.minecraftforge.fml.common.FMLLog;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
-import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * Created by Steven on 11/27/2016.
  */
-public class GitRunnable implements Runnable {
-    private volatile List<GitRequest> gitRequests = new ArrayList<GitRequest>();
+public class GitRunnable extends Thread {
+    private volatile ArrayBlockingQueue<GitRequest> gitRequests = new ArrayBlockingQueue<GitRequest>( 100 );
 
     /**
      * When an object implementing interface <code>Runnable</code> is used
@@ -26,26 +27,35 @@ public class GitRunnable implements Runnable {
     public void run() {
         FMLLog.info( "Git Thread Started" );
         while( !Thread.currentThread().isInterrupted() ){
-            while( gitRequests.isEmpty() ){
-                Thread.yield();
+            GitRequest gitRequest;
+            try {
+                gitRequest = gitRequests.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                FMLLog.bigWarning( "Git thread interrupted!" );
+                return;
             }
-            GitRequest gitRequest = gitRequests.get( 0 );
             FMLLog.info( "Starting on request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() );
             try {
-                gitRequest.getGitCommand().call();
+                gitRequest.call();
             } catch (GitAPIException e) {
                 FMLLog.info( "Request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() + " Failed with message " + e.getMessage() );
                 gitRequest.getComputer().queueEvent( "ccgit", new Object[]{gitRequest.getIdentifier(), false, e.getMessage()} );
             } finally {
-                FMLLog.info( "Request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() + "Succeeded" );
+                FMLLog.info( "Request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() + " Succeeded" );
                 gitRequest.getComputer().queueEvent( "ccgit", new Object[]{gitRequest.getIdentifier(), true} );
             }
             Thread.yield();
         }
     }
 
-    public synchronized void queue(GitRequest gitRequest ){
-        FMLLog.info( "Queued git request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() );
-        gitRequests.add( gitRequest );
+    public synchronized void queue( GitRequest gitRequest ) throws LuaException {
+        FMLLog.info("Queued git request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier());
+        FMLLog.info("The git queue capacity is now: " + gitRequests.remainingCapacity());
+        try {
+            gitRequests.add(gitRequest);
+        } catch (IllegalStateException e) {
+            throw new LuaException("No room in queue");
+        }
     }
 }

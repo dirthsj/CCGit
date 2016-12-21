@@ -72,12 +72,24 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                 }
                 break;
             case 1: //pull <gitDir> <remote>
-
-            case 2: //push <gitDir>
+                FileRepositoryBuilder fileRepositoryBuilder2 = new FileRepositoryBuilder();
+                fileRepositoryBuilder2.setGitDir( getAbsoluteDir( (String)arguments[0] ) );
                 try {
-                    Repository repo = new FileRepository( (String)arguments[0] );
-                    Git git = new Git( repo );
-                    return sendToGitThread( context, git.push().setRemote( "" ) );
+                    Git git2 = new Git( fileRepositoryBuilder2.build() );
+                    return sendToGitThread( context, git2.pull().setRemote( (String)arguments[0] ) );
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return new Object[]{false};
+            case 2: //push <gitDir> <remote
+                if( arguments.length < 2 || !( arguments[ 0 ] instanceof String && arguments[ 1 ] instanceof String ) ){
+                    throw new LuaException( "Expected String, String" );
+                }
+                FileRepositoryBuilder fileRepositoryBuilder1 = new FileRepositoryBuilder();
+                fileRepositoryBuilder1.setGitDir( getAbsoluteDir( (String)arguments[0] ) );
+                try {
+                    Git git = new Git( fileRepositoryBuilder1.build() );
+                    return sendToGitThread( context, git.push().setRemote( (String)arguments[1] ) );
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

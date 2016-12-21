@@ -12,6 +12,8 @@ import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
+import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.URIish;
 import org.squiddev.cctweaks.api.lua.ILuaAPI;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
@@ -69,9 +71,8 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                     e.printStackTrace();
                 }
                 break;
-            case 1: //pull <repository> <remote>
+            case 1: //pull <gitDir> <remote>
 
-                break;
             case 2: //push <gitDir>
                 try {
                     Repository repo = new FileRepository( (String)arguments[0] );
@@ -95,18 +96,12 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                 if( arguments.length < 3 || !( arguments[ 0 ] instanceof String && arguments[ 1 ] instanceof String && arguments[ 2 ] instanceof String ) ){
                     throw new LuaException( "Expected String, String, String" );
                 }
-                builder = new RepositoryBuilder();
-                builder.setGitDir( getAbsoluteDir( (String)arguments[ 0 ] ) );
                 try {
-                    Git git = new Git( builder.build() );
-                    RemoteAddCommand remote = git.remoteAdd();
-                    remote.setName( (String)arguments[ 1 ] );
-                    URIish urIish = new URIish( (String)arguments[2] );
-                    remote.setUri( urIish );
-                    return sendToGitThread( context, remote );
+                    StoredConfig config = (new RepositoryBuilder()).setGitDir( getAbsoluteDir( (String)arguments[ 0 ] )).build().getConfig();
+                    config.setString( "remote", (String)arguments[1], "url", (String)arguments[2] );
+                    config.save();
+                    return new Object[]{true};
                 } catch (IOException e) {
-                    return new Object[]{false, e.getMessage()};
-                } catch (URISyntaxException e) {
                     return new Object[]{false, e.getMessage()};
                 }
             case 6: //getRemoteNames <gitDir>
@@ -114,8 +109,9 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                     throw new LuaException( "Expected String" );
                 }
                 try {
-                    Repository repo = new FileRepository( (String)arguments[0] );
-                    return repo.getRemoteNames().toArray();
+                    FileRepositoryBuilder fileRepositoryBuilder = new FileRepositoryBuilder();
+                    fileRepositoryBuilder.setGitDir( getAbsoluteDir((String)arguments[ 0 ]) );
+                    return fileRepositoryBuilder.build().getRemoteNames().toArray();
                 } catch (IOException e) {
                     return new Object[]{false, e.getMessage()};
                 }

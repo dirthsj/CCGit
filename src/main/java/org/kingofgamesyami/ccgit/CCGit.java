@@ -8,10 +8,8 @@ import net.minecraft.server.MinecraftServer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.GitCommand;
 import org.eclipse.jgit.api.InitCommand;
-import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -22,7 +20,6 @@ import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * Created by Steven on 11/25/2016.
@@ -61,6 +58,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
     public Object[] callMethod(ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
         switch( method ) {
             case 0: // commit <gitDir> <message>
+            {
                 if (arguments.length < 2 || !(arguments[0] instanceof String && arguments[1] instanceof String)) {
                     throw new LuaException("Expected String, String");
                 }
@@ -74,7 +72,9 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                     e.printStackTrace();
                 }
                 break;
+            }
             case 1: //pull <gitDir> <remote>
+            {
                 FileRepositoryBuilder fileRepositoryBuilder2 = new FileRepositoryBuilder();
                 fileRepositoryBuilder2.setGitDir(getAbsoluteDir((String) arguments[0]));
                 try {
@@ -84,7 +84,9 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                     e.printStackTrace();
                 }
                 return new Object[]{false};
-            case 2: //push <gitDir> <remote> <auth>
+            }
+            case 2: //push <gitDir> <remote>
+            {
                 if (arguments.length < 2 || !(arguments[0] instanceof String && arguments[1] instanceof String)) {
                     throw new LuaException("Expected String, String");
                 }
@@ -97,17 +99,23 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                     e.printStackTrace();
                 }
                 return new Object[]{false};
+            }
             case 3: //clone <remote> <directory>
+            {
                 if (arguments.length < 2 || !(arguments[0] instanceof String && arguments[1] instanceof String)) {
                     throw new LuaException("Expected String, String");
                 }
                 return sendToGitThread(context, Git.cloneRepository().setURI((String) arguments[0]).setDirectory(getAbsoluteDir((String) arguments[1])).setCredentialsProvider(credentials));
+            }
             case 4: // init <directory>
+            {
                 if (arguments.length < 1 || !(arguments[0] instanceof String)) {
                     throw new LuaException("Expected String");
                 }
                 return sendToGitThread(context, Git.init().setDirectory(getAbsoluteDir((String) arguments[0])));
+            }
             case 5: // addRemote <gitDir> <name> <uri>
+            {
                 if (arguments.length < 3 || !(arguments[0] instanceof String && arguments[1] instanceof String && arguments[2] instanceof String)) {
                     throw new LuaException("Expected String, String, String");
                 }
@@ -119,7 +127,9 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                 } catch (IOException e) {
                     return new Object[]{false, e.getMessage()};
                 }
+            }
             case 6: //getRemoteNames <gitDir>
+            {
                 if (arguments.length < 1 || !(arguments[0] instanceof String)) {
                     throw new LuaException("Expected String");
                 }
@@ -130,11 +140,15 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
                 } catch (IOException e) {
                     return new Object[]{false, e.getMessage()};
                 }
+            }
             case 7: //setCredentials <username> <password>
+            {
                 if (arguments.length < 2 || !(arguments[0] instanceof String && arguments[1] instanceof String)) {
                     throw new LuaException("Expected String, String");
                 }
                 credentials = new UsernamePasswordCredentialsProvider((String) arguments[0], (String) arguments[1]);
+                return new Object[]{true};
+            }
             case 8: //addAll <gitDir>
             {
                 FileRepositoryBuilder fileRepositoryBuilder = new FileRepositoryBuilder();

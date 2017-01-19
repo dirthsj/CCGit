@@ -7,6 +7,9 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import org.squiddev.cctweaks.api.CCTweaksAPI;
+import org.squiddev.cctweaks.api.lua.CCTweaksPlugin;
+import org.squiddev.cctweaks.api.lua.ILuaEnvironment;
 
 /**
  * Created by Steven on 11/25/2016.
@@ -19,7 +22,7 @@ public class Main {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
-        Register.init();
+        Register.init(CCTweaksAPI.instance().luaEnvironment());
         gitRunnable = new GitRunnable();
         gitRunnable.setName( "Git Thread" );
     }
@@ -37,6 +40,17 @@ public class Main {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {
             FMLLog.info( "Stopping Git Thread" );
             gitRunnable.interrupt();
+        }
+    }
+
+    public static class CCGitPlugin extends CCTweaksPlugin {
+        @Override
+        public void register(ILuaEnvironment environment) {
+            Register.init(environment);
+            gitRunnable = new GitRunnable();
+            gitRunnable.setDaemon(true);
+            gitRunnable.setName( "Git Thread" );
+            gitRunnable.start();
         }
     }
 }

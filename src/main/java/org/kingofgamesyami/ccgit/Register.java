@@ -10,9 +10,7 @@ import org.squiddev.cctweaks.api.lua.ILuaEnvironment;
  * Created by Steven on 11/25/2016.
  */
 public class Register {
-    public static void init() {
-        ILuaEnvironment environment = CCTweaksAPI.instance().luaEnvironment();
-
+    public static void init(ILuaEnvironment environment) {
         environment.registerAPI(new ILuaAPIFactory() {
             @Override
             public ILuaAPI create(IComputerAccess computer) {

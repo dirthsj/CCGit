@@ -30,7 +30,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
     private int identifier = 0;
     private UsernamePasswordCredentialsProvider credentials;
 
-    public CCGit( IComputerAccess computer, String baseDir ){
+    public CCGit( IComputerAccess computer ){
         this.computer = computer;
         this.computerDir = new File( ComputerCraft.getWorldDir( MinecraftServer.getServer().getEntityWorld() ), "computer/" + computer.getID() );
     }

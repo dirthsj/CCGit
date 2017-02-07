@@ -1,7 +1,6 @@
 package org.kingofgamesyami.ccgit;
 
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
@@ -16,30 +15,28 @@ import org.squiddev.cctweaks.api.lua.ILuaEnvironment;
  */
 @Mod( modid="ccgit", version = "0.1")
 public class Main {
-
-    public static GitRunnable gitRunnable;
+    private final LogHandler logger = new LogHandler.FMLLogger();
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
         Register.init(CCTweaksAPI.instance().luaEnvironment());
-        gitRunnable = new GitRunnable();
-        gitRunnable.setName( "Git Thread" );
+        GitRunnable.instance = new GitRunnable( logger );
     }
 
     @Mod.EventHandler
     public void onServerStart(FMLServerStartedEvent event) {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {
-            FMLLog.info( "Attempting to start Git Thread" );
-            gitRunnable.start();
+            logger.info( "Attempting to start Git Thread" );
+            GitRunnable.instance.start();
         }
     }
 
     @Mod.EventHandler
     public void onServerStopped(FMLServerStoppedEvent event) {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {
-            FMLLog.info( "Stopping Git Thread" );
-            gitRunnable.interrupt();
+            logger.info( "Stopping Git Thread" );
+            GitRunnable.instance.interrupt();
         }
     }
 
@@ -47,10 +44,8 @@ public class Main {
         @Override
         public void register(ILuaEnvironment environment) {
             Register.init(environment);
-            gitRunnable = new GitRunnable();
-            gitRunnable.setDaemon(true);
-            gitRunnable.setName( "Git Thread" );
-            gitRunnable.start();
+            GitRunnable.instance = new GitRunnable( new LogHandler.BasicLogger() );
+            GitRunnable.instance.start();
         }
     }
 }

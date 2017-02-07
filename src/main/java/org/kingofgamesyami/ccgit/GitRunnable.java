@@ -1,7 +1,6 @@
 package org.kingofgamesyami.ccgit;
 
 import dan200.computercraft.api.lua.LuaException;
-import net.minecraftforge.fml.common.FMLLog;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -10,7 +9,16 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Created by Steven on 11/27/2016.
  */
 public class GitRunnable extends Thread {
+    public static GitRunnable instance;
+
+    private final LogHandler logger;
     private volatile ArrayBlockingQueue<GitRequest> gitRequests = new ArrayBlockingQueue<GitRequest>( 100 );
+
+    public GitRunnable (LogHandler logger) {
+        this.logger = logger;
+        setName( "Git Thread" );
+        setDaemon(true);
+    }
 
     /**
      * When an object implementing interface <code>Runnable</code> is used
@@ -25,24 +33,24 @@ public class GitRunnable extends Thread {
      */
     @Override
     public void run() {
-        FMLLog.info( "Git Thread Started" );
+        logger.info( "Git Thread Started" );
         while( !Thread.currentThread().isInterrupted() ){
             GitRequest gitRequest;
             try {
                 gitRequest = gitRequests.take();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                FMLLog.bigWarning( "Git thread interrupted!" );
+                logger.warning( "Git thread interrupted!" );
                 return;
             }
-            FMLLog.info( "Starting on request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() );
+            logger.info( "Starting on request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() );
             try {
                 gitRequest.call();
             } catch (GitAPIException e) {
-                FMLLog.info( "Request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() + " Failed with message " + e.getMessage() );
+                logger.info( "Request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() + " Failed with message " + e.getMessage() );
                 gitRequest.getComputer().queueEvent( "ccgit", new Object[]{gitRequest.getIdentifier(), false, e.getMessage()} );
             } finally {
-                FMLLog.info( "Request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() + " Succeeded" );
+                logger.info( "Request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier() + " Succeeded" );
                 gitRequest.getComputer().queueEvent( "ccgit", new Object[]{gitRequest.getIdentifier(), true} );
             }
             Thread.yield();
@@ -50,8 +58,8 @@ public class GitRunnable extends Thread {
     }
 
     public synchronized void queue( GitRequest gitRequest ) throws LuaException {
-        FMLLog.info("Queued git request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier());
-        FMLLog.info("The git queue capacity is now: " + gitRequests.remainingCapacity());
+        logger.info("Queued git request " + gitRequest.getComputer().getID() + ":" + gitRequest.getIdentifier());
+        logger.info("The git queue capacity is now: " + gitRequests.remainingCapacity());
         try {
             gitRequests.add(gitRequest);
         } catch (IllegalStateException e) {

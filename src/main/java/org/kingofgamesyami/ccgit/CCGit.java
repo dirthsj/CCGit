@@ -30,7 +30,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
     private int identifier = 0;
     private UsernamePasswordCredentialsProvider credentials;
 
-    public CCGit( IComputerAccess computer ){
+    public CCGit( IComputerAccess computer, String baseDir ){
         this.computer = computer;
         this.computerDir = new File( ComputerCraft.getWorldDir( MinecraftServer.getServer().getEntityWorld() ), "computer/" + computer.getID() );
     }
@@ -173,7 +173,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
 
     private Object[] sendToGitThread( ILuaContext context, GitCommand command ) throws LuaException, InterruptedException {
         int thisRequest = identifier++;
-        Main.gitRunnable.queue( new GitRequest( computer, thisRequest, command ) );
+        GitRunnable.instance.queue( new GitRequest( computer, thisRequest, command ) );
         while(true){
             Object[] event = context.pullEvent( "ccgit" );
             if( event.length > 2 && event[1] instanceof Double && (Double)event[ 1 ] == thisRequest ){
@@ -184,7 +184,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
 
     private Object[] sendToGitThread( ILuaContext context, InitCommand command ) throws LuaException, InterruptedException {
         int thisRequest = identifier++;
-        Main.gitRunnable.queue( new GitRequest( computer, thisRequest, command ) );
+        GitRunnable.instance.queue( new GitRequest( computer, thisRequest, command ) );
         while(true){
             Object[] event = context.pullEvent( "ccgit" );
             if( event.length > 2 && event[1] instanceof Double && (Double)event[ 1 ] == thisRequest ){

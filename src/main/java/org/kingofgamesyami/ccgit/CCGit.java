@@ -1,10 +1,8 @@
 package org.kingofgamesyami.ccgit;
 
-import dan200.computercraft.ComputerCraft;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import net.minecraft.server.MinecraftServer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.GitCommand;
 import org.eclipse.jgit.api.InitCommand;
@@ -15,6 +13,7 @@ import org.eclipse.jgit.lib.RepositoryBuilder;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.*;
+import org.squiddev.cctweaks.api.lua.IExtendedComputerAccess;
 import org.squiddev.cctweaks.api.lua.ILuaAPI;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 
@@ -30,9 +29,9 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
     private int identifier = 0;
     private UsernamePasswordCredentialsProvider credentials;
 
-    public CCGit( IComputerAccess computer ){
+    public CCGit( IExtendedComputerAccess computer ){
         this.computer = computer;
-        this.computerDir = new File( ComputerCraft.getWorldDir( MinecraftServer.getServer().getEntityWorld() ), "computer/" + computer.getID() );
+        this.computerDir = computer.getRootMountPath();
     }
 
     @Override
@@ -173,7 +172,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
 
     private Object[] sendToGitThread( ILuaContext context, GitCommand command ) throws LuaException, InterruptedException {
         int thisRequest = identifier++;
-        Main.gitRunnable.queue( new GitRequest( computer, thisRequest, command ) );
+        GitRunnable.instance.queue( new GitRequest( computer, thisRequest, command ) );
         while(true){
             Object[] event = context.pullEvent( "ccgit" );
             if( event.length > 2 && event[1] instanceof Double && (Double)event[ 1 ] == thisRequest ){
@@ -184,7 +183,7 @@ public class CCGit implements ILuaAPI, IMethodDescriptor {
 
     private Object[] sendToGitThread( ILuaContext context, InitCommand command ) throws LuaException, InterruptedException {
         int thisRequest = identifier++;
-        Main.gitRunnable.queue( new GitRequest( computer, thisRequest, command ) );
+        GitRunnable.instance.queue( new GitRequest( computer, thisRequest, command ) );
         while(true){
             Object[] event = context.pullEvent( "ccgit" );
             if( event.length > 2 && event[1] instanceof Double && (Double)event[ 1 ] == thisRequest ){
